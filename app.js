@@ -3,12 +3,14 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const ejs = require("ejs");
+const dotenv = require('dotenv');
+dotenv.config();
 
 const homeStartingContent = "This is daily journal page where you can store your great thoughts and publis your thoughts as daily blogs. To publish just add /compose at the end of your link";
 const aboutContent = "Information not required for now";
-const contactContent = "AT THE GYM......";
+const contactContent = "JUST think";
 const mongoose=require("mongoose");
-mongoose.connect("mongodb+srv://prakhar1:mongodb1@cluster0.bnpx7.mongodb.net/blogDB",{
+mongoose.connect(process.env.mongoURL,{
   useNewUrlParser: true,
   useUnifiedTopology: true,
   useCreateIndex: true,
