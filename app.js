@@ -7,7 +7,20 @@ const ejs = require("ejs");
 const homeStartingContent = "This is daily journal page where you can store your great thoughts and publis your thoughts as daily blogs. To publish just add /compose at the end of your link";
 const aboutContent = "Information not required for now";
 const contactContent = "AT THE GYM......";
-const posts=[];
+const mongoose=require("mongoose");
+mongoose.connect("mongodb+srv://prakhar1:mongodb1@cluster0.bnpx7.mongodb.net/blogDB",{
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  useCreateIndex: true,
+  useFindAndModify: false
+});
+const postSchema={
+  title:String,
+  content:String
+};
+
+const Post=mongoose.model("Post",postSchema);
+
 const app = express();
 var _ = require('lodash');
 
@@ -18,7 +31,12 @@ app.use(express.static("public"));
 
 
 app.get("/",function(req,res){
-  res.render("home",{content:homeStartingContent, array:posts});
+  Post.find({}, function(err, posts){
+    res.render("home", {
+      content: homeStartingContent,
+      array: posts
+      });
+  });
 })
 
 
@@ -37,36 +55,41 @@ app.get("/compose",function(req,res){
 })
 
 app.post("/compose",function(req,res){
-  const post={
+  const post=new Post({
     title:req.body.posttitle,
-    body:req.body.postbody
-  }
+    content:req.body.postbody
+  });
 
-  posts.push(post);
+  post.save(function(err){
+    if(!err)
+    {
+      res.redirect("/");
+
+    }
+  });
   
-  res.redirect("/");
-})
+  
+});
 
 app.get("/posts/:p",function(req,res)
 {
-  const reqtitle=_.lowerCase(req.params.p);
-  posts.forEach(function (ele) {
-    var ti=_.lowerCase(ele.title);
-    if(ti===reqtitle)
-    {res.render("post",{name:ele.title, data:ele.body});
+  const reqtitle=req.params.p;
+  Post.findOne({title:reqtitle},function (err,found) {
+    if(!err)
+    {
+      res.render("post",{name:found.title, data:found.content});
+    }
+    
+    
    
-  }
-  else
-  {
-    console.log("not a match")
-  }
-  });
+  })
+ 
   
-})
+});
 
 
 
 
-app.listen(3000, function() {
+app.listen(process.env.PORT||3000, function() {
   console.log("Server started on port 3000");
 });
